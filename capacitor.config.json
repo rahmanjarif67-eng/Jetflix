@@ -1,0 +1,8 @@
+{
+  "appId": "com.zsc.jetflix",
+  "appName": "JET-FLIX",
+  "webDir": "www",
+  "server": { "androidScheme": "https", "cleartext": true },
+  "android": { "allowMixedContent": true },
+  "plugins": { "CapacitorHttp": { "enabled": true } }
+}
