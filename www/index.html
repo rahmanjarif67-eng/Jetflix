@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f">
+<title>JET-FLIX</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.js"></script>
+<style>
+:root{--ac:229,9,20;--glass:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.05));--gb:1px solid rgba(255,255,255,.26);--gs:0 10px 28px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.07)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+body{font-family:sans-serif;background:#0b0b0f;color:#fff;padding-bottom:110px;overflow-x:hidden;-webkit-user-select:none;user-select:none}
+input{-webkit-user-select:text;user-select:text}
+#glow{position:fixed;top:0;left:0;right:0;height:75vh;background-color:rgb(var(--ac));opacity:.55;transition:background-color 1s;-webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent);z-index:-1}
+#splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,#2b050a,#000 70%);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:700px;transition:opacity .7s,transform .7s}
+#splash.hide{opacity:0;transform:scale(1.5);pointer-events:none}
+.logo3d{display:flex;transform-style:preserve-3d;animation:sw 3s ease-in-out infinite}
+.logo3d span{display:inline-block;font-size:46px;font-weight:900;color:#e50914;opacity:0;transform:translateZ(-400px) rotateX(90deg);animation:li .9s forwards cubic-bezier(.2,.9,.3,1.2);animation-delay:calc(var(--i)*.12s);text-shadow:0 1px 0 #b00,0 2px 0 #a00,0 3px 0 #900,0 4px 0 #800,0 5px 0 #700,0 12px 24px rgba(229,9,20,.8)}
+@keyframes li{to{opacity:1;transform:none}}
+@keyframes sw{0%,100%{transform:rotateY(-20deg) rotateX(6deg)}50%{transform:rotateY(20deg) rotateX(-6deg)}}
+.bar{width:140px;height:3px;background:#222;border-radius:3px;margin-top:34px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#e50914;animation:ld 2.6s forwards}
+@keyframes ld{to{width:100%}}
+
+/* ---- Liquid glass (shared) ---- */
+.sbox,nav,.gl,.gb,#close,#hero button,.card .im,nav button.on{-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%)}
+.rip{position:absolute;border-radius:50%;pointer-events:none;width:20px;height:20px;margin:-10px 0 0 -10px;background:radial-gradient(circle,rgba(255,255,255,.55),rgba(var(--ac),.28) 45%,transparent 70%);transform:scale(0);animation:rip .8s ease-out forwards;z-index:5}
+@keyframes rip{to{transform:scale(22);opacity:0}}
+
+header{position:sticky;top:0;z-index:20;padding:10px 14px 8px;background:linear-gradient(#0b0b0fee 60%,transparent)}
+header h1{color:#e50914;font-size:22px;font-weight:900;letter-spacing:1px;text-shadow:0 0 14px rgba(var(--ac),.8);margin-bottom:8px}
+.sbox{position:relative;overflow:hidden;display:flex;align-items:center;border-radius:26px;padding:0 12px;height:46px;border:var(--gb);background:var(--glass);box-shadow:0 6px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.35);transition:box-shadow .3s,border-color .3s}
+.sbox:focus-within{border-color:rgba(var(--ac),.9);box-shadow:0 0 0 3px rgba(var(--ac),.3),0 8px 24px rgba(var(--ac),.35)}
+.sbox svg{width:20px;height:20px;fill:none;stroke:rgba(255,255,255,.75);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+#search{flex:1;background:none;border:none;outline:none;color:#fff;font-size:15px;padding:0 10px;height:100%}
+#search::placeholder{color:rgba(255,255,255,.55)}
+#sclr{display:none;width:26px;height:26px;border-radius:50%;border:none;background:rgba(255,255,255,.22);color:#fff;font-size:13px}
+body.st header .sbox{display:none}
+
+#hero{position:relative;margin:4px 12px 6px;height:58vh;min-height:360px;border-radius:18px;overflow:hidden;background:#15151c center/cover;box-shadow:0 14px 40px -12px rgba(var(--ac),.9),inset 0 0 0 1px rgba(255,255,255,.25);transition:box-shadow 1s}
+#hero::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 30%),linear-gradient(transparent 30%,rgba(var(--ac),.35) 60%,#0b0b0f 100%)}
+#hero .hc{position:absolute;left:0;right:0;bottom:0;padding:18px;z-index:2}
+#hero h2{font-size:26px;text-shadow:0 2px 10px #000}
+#hero small{color:#ddd;display:block;margin:6px 0 12px}
+#hero button{position:relative;overflow:hidden;background:var(--glass);border:var(--gb);box-shadow:var(--gs);color:#fff;padding:10px 26px;border-radius:24px;font-weight:bold;font-size:15px}
+.dots{display:flex;gap:6px;margin-top:12px}
+.dots i{width:7px;height:7px;border-radius:50%;background:#fff5}
+.dots i.on{background:#fff;width:20px;border-radius:4px}
+.fade{animation:fd .8s}
+@keyframes fd{from{opacity:.2;transform:scale(1.04)}}
+.sec{padding:10px 0 4px 14px}
+.sec h2{font-size:17px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec h2::before{content:"";width:4px;height:18px;border-radius:2px;background:rgb(var(--ac));transition:background 1s}
+.row{display:flex;gap:12px;overflow-x:auto;padding:4px 14px 18px 0}
+.row::-webkit-scrollbar{display:none}
+.card{--c:60,60,75;flex:0 0 auto;width:112px;position:relative;transition:transform .25s}
+.card:active{transform:scale(.94) perspective(400px) rotateY(8deg)}
+.card .im{position:relative;height:160px;border-radius:14px;overflow:hidden;background:#1a1a22;box-shadow:0 10px 22px -8px rgba(var(--c),.95),0 0 0 1px rgba(var(--c),.45);transition:box-shadow .6s}
+.card .im::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;background:linear-gradient(135deg,rgba(255,255,255,.3),rgba(255,255,255,0) 35%,rgba(255,255,255,0) 75%,rgba(255,255,255,.12));box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.2),inset 0 -8px 14px -8px rgba(255,255,255,.18)}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card.ch .im{height:84px;background:rgba(var(--c),.18);display:flex;align-items:center;justify-content:center;padding:10px}
+.card.ch img{object-fit:contain}
+.card p{font-size:12px;margin-top:7px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.live{position:absolute;top:6px;left:6px;background:#e50914;color:#fff;font-size:9px;font-weight:bold;padding:2px 6px;border-radius:4px;z-index:4;animation:pl 1.4s infinite}
+@keyframes pl{50%{opacity:.5}}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 12px;padding:6px 14px}
+.grid .card{width:100%}
+.grid .card .im{height:150px}
+.grid .card.ch .im{height:84px}
+.ttl{padding:6px 14px;font-size:20px;font-weight:bold}
+
+nav{position:fixed;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;gap:1px;padding:6px;border-radius:30px;z-index:30;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.06));-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);box-shadow:0 12px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.08)}
+nav button{position:relative;overflow:hidden;flex:1;padding:8px 0 7px;border-radius:24px;background:none;border:none;color:#cfcfd6;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:background .3s,color .3s}
+nav button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
+nav button.on{color:#fff;background:rgba(var(--ac),.38);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 14px rgba(var(--ac),.45)}
+nav button.on svg{transform:scale(1.12)}
+
+#player{position:fixed;inset:0;background:linear-gradient(rgb(var(--ac)),#000 55%);z-index:50;display:none;flex-direction:column}
+#player.show{display:flex}
+#player video{width:100%;max-height:58vh;background:#000;margin-top:56px;flex:0 0 auto}
+#close{position:absolute;overflow:hidden;top:12px;left:12px;z-index:60;background:var(--glass);border:var(--gb);box-shadow:var(--gs);color:#fff;font-size:20px;width:40px;height:40px;border-radius:50%}
+#pinfo{padding:16px;overflow:auto;flex:1;min-height:0}
+#pinfo h3{font-size:20px;margin-bottom:6px}
+#pinfo p{color:#ddd;font-size:13px;line-height:1.6}
+#perr{color:#ffb4b4;padding:8px 16px 0;font-size:13px;white-space:pre-wrap}
+.acts{display:flex;flex-wrap:wrap}
+.gb{position:relative;overflow:hidden;margin:14px 8px 0 0;padding:10px 16px;border-radius:24px;border:var(--gb);background:var(--glass);box-shadow:var(--gs);color:#fff;font-size:14px;font-weight:bold;display:inline-flex;align-items:center;gap:6px}
+.gb.on{border-color:rgba(var(--ac),.9);background:rgba(var(--ac),.35)}
+#dl,#pip,#retry{display:none}
+#dl svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#more{padding-bottom:30px}
+#more h4{font-size:16px;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+#more h4::before{content:"";width:4px;height:16px;border-radius:2px;background:rgb(var(--ac))}
+#more .row{padding-left:0}
+.empty{text-align:center;color:#888;padding:60px 20px}
+
+.set{padding:6px 14px}
+.set h2{font-size:20px;margin:6px 0 14px}
+.gl{position:relative;overflow:hidden;border-radius:18px;padding:14px;margin-bottom:12px;border:var(--gb);background:var(--glass);box-shadow:var(--gs);transition:transform .35s cubic-bezier(.3,1.5,.5,1),box-shadow .35s,border-color .35s}
+.gl::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.2),transparent);transform:skewX(-20deg);animation:glShine 1.4s ease 1;pointer-events:none}
+@keyframes glShine{to{left:130%}}
+.gl.press{transform:scale(.965);border-color:rgba(var(--ac),.8);box-shadow:0 4px 18px rgba(var(--ac),.4),inset 0 1px 0 rgba(255,255,255,.5)}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.trow b{font-size:15px}
+.trow small{display:block;color:#bbb;font-size:12px;margin-top:3px;line-height:1.4}
+.sw{position:relative;flex:0 0 auto;width:50px;height:28px}
+.sw input{opacity:0;width:100%;height:100%;position:absolute;z-index:6}
+.sw span{position:absolute;inset:0;border-radius:20px;background:#444;transition:background .3s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .3s}
+.sw input:checked+span{background:rgb(var(--ac))}
+.sw input:checked+span::after{transform:translateX(22px)}
+details{margin-bottom:8px}
+summary{cursor:pointer;font-weight:bold;font-size:15px;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";font-size:18px}
+details[open] summary::after{content:"–"}
+details p{color:#ccc;font-size:13px;line-height:1.65;margin-top:10px;overflow:hidden}
+details[open] p{animation:dd .45s cubic-bezier(.2,.9,.3,1)}
+@keyframes dd{from{opacity:0;transform:translateY(-8px);filter:blur(6px)}}
+.about{text-align:center}
+.about .big{font-size:20px;font-weight:900;color:rgb(var(--ac));letter-spacing:1px}
+.about p{color:#ccc;font-size:13px;line-height:1.8;margin-top:6px}
+.about .nm{color:#fff;font-weight:bold;font-size:15px}
+.set .gl{opacity:0;transform:translateY(34px) scale(.94);filter:blur(10px);animation:glIn .75s cubic-bezier(.2,.9,.3,1.15) forwards;animation-delay:calc(var(--d,0)*.12s)}
+@keyframes glIn{to{opacity:1;transform:none;filter:blur(0)}}
+.set .gl::before{animation-delay:calc(var(--d,0)*.12s + .5s)}
+.set .gl.press{transform:scale(.965)}
+
+/* ---- Broken glass FX ---- */
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:200;pointer-events:none}
+body.shake{animation:shk .45s}
+@keyframes shk{0%,100%{transform:none}15%{transform:translate(-5px,3px)}30%{transform:translate(5px,-3px)}45%{transform:translate(-3px,-2px)}60%{transform:translate(3px,2px)}80%{transform:translate(-1px,1px)}}
+
+/* ===== v1.6 ===== */
+#player video{aspect-ratio:16/9;object-fit:contain;direction:ltr}
+#perr:not(:empty){margin:10px 12px 0;padding:10px 14px;border-radius:16px;border:var(--gb);background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.mh{font-size:13px;font-weight:bold;color:rgb(var(--ac));margin:14px 0 4px;letter-spacing:.5px}
+.mrow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.mrow span{color:#bbb}.mrow b{text-align:end;word-break:break-word;font-size:13px}
+.mb{height:8px;border-radius:6px;margin:4px 0 6px;background:rgba(255,255,255,.12);box-shadow:inset 0 1px 2px rgba(0,0,0,.5);overflow:hidden}
+.mb i{display:block;height:100%;width:2%;border-radius:6px;background:linear-gradient(90deg,rgba(var(--ac),.95),rgba(255,255,255,.8));transition:width .6s}
+.gm{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fd .3s}
+.gm .gl{width:100%;max-width:340px;margin:0;text-align:center}
+.gm b{font-size:16px}.gm p{color:#ccc;font-size:13px;line-height:1.6;margin:10px 0 2px}
+.gm .acts{justify-content:center}
+/* Live TV unique loader */
+#lv{position:absolute;left:0;right:0;top:56px;aspect-ratio:16/9;z-index:55;display:none;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(var(--ac),.6),#05050a 72%);border-bottom:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+#lv.show{display:block;animation:fd .4s}
+.lv-wave i{position:absolute;left:50%;top:38%;width:60px;height:60px;margin:-30px;border-radius:50%;border:2px solid rgba(255,255,255,.55);box-shadow:0 0 18px rgba(var(--ac),.8);opacity:0;animation:lvw 2.4s infinite ease-out}
+.lv-wave i:nth-child(2){animation-delay:.8s}.lv-wave i:nth-child(3){animation-delay:1.6s}
+@keyframes lvw{0%{transform:scale(.4);opacity:.9}100%{transform:scale(3.8);opacity:0}}
+.lv-core{position:absolute;left:50%;top:38%;width:58px;height:58px;margin:-29px;border-radius:50%;border:var(--gb);background:var(--glass);box-shadow:var(--gs),0 0 30px rgba(var(--ac),.8);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:lvp 1.6s infinite ease-in-out;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+@keyframes lvp{50%{transform:scale(1.12)}}
+.lv-core img{width:72%;height:72%;object-fit:contain;display:none}
+.lv-core svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lv-eq{position:absolute;left:0;right:0;bottom:0;height:26%;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:0 10px;opacity:.7}
+.lv-eq i{flex:1;max-width:8px;height:15%;border-radius:3px 3px 0 0;background:linear-gradient(rgb(var(--ac)),rgba(255,255,255,.85));animation:lve 1s infinite ease-in-out alternate;animation-delay:var(--d)}
+@keyframes lve{to{height:var(--h)}}
+.lv-t,.lv-n,.lv-s{position:absolute;left:0;right:0;text-align:center;z-index:2;padding:0 12px;text-shadow:0 2px 8px #000}
+.lv-t{top:calc(38% + 38px);font-size:11px;letter-spacing:4px;font-weight:900;text-transform:uppercase}
+.lv-t::after{content:"";animation:lvd 1.4s steps(1) infinite}
+@keyframes lvd{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.lv-n{top:calc(38% + 58px);font-size:15px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-s{top:calc(38% + 80px);font-size:11px;color:#d5d5dd}
+.lv-tag{position:absolute;top:10px;inset-inline-start:12px;display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:14px;font-size:10px;font-weight:900;border:var(--gb);background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.lv-tag b{width:7px;height:7px;border-radius:50%;background:#e50914;animation:pl 1.2s infinite}
+.lv-scan{position:absolute;left:0;right:0;top:-40%;height:40%;background:linear-gradient(transparent,rgba(255,255,255,.12),transparent);animation:lvs 2.6s infinite linear}
+@keyframes lvs{to{top:110%}}
+/* RTL (Arabic) */
+[dir=rtl] #close{left:auto;right:12px}
+[dir=rtl] .live{left:auto;right:6px}
+[dir=rtl] .sec{padding:10px 14px 4px 0}
+[dir=rtl] .row{padding:4px 0 18px 14px}
+[dir=rtl] .sw{direction:ltr}
+
+body.weak *{animation:none!important;transition:none!important}
+body.weak #glow,body.weak #fx{display:none}
+body.weak .sbox,body.weak nav,body.weak .gl,body.weak .gb,body.weak #close,body.weak #hero button,body.weak .card .im{-webkit-backdrop-filter:none;backdrop-filter:none}
+body.weak nav{background:rgba(28,28,36,.97)}
+body.weak .set .gl{opacity:1!important;transform:none!important;filter:none!important}
+</style>
+</head>
+<body>
+<script>
+setTimeout(function(){var s=document.getElementById("splash");if(s)s.remove()},7000);
+window.addEventListener("error",function(e){
+  if(!e.message||e.message==="Script error.") return;
+  var d=document.createElement("div");
+  d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:999;background:#900;color:#fff;padding:10px;font-size:13px";
+  d.textContent="ERROR: "+e.message;
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove()},6000);
+});
+</script>
+<div id="glow"></div>
+<div id="splash">
+  <div class="logo3d" id="logo"></div>
+  <div class="bar"><i></i></div>
+</div>
+
+<header>
+  <h1>JET-FLIX</h1>
+  <div class="sbox">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search" placeholder="Search movies, series, live TV..." autocomplete="off">
+    <button id="sclr">✕</button>
+  </div>
+</header>
+<main id="main"></main>
+
+<nav>
+  <button data-t="home" class="on"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
+  <button data-t="channels"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>Live</button>
+  <button data-t="movies"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="m3 8 3-5h4L7 8m3 0 3-5h4l-3 5m3 0 3-5"/></svg>Movies</button>
+  <button data-t="series"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/></svg>Series</button>
+  <button data-t="dramas"><svg viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2zM13 5v2M13 17v2M13 11v2"/></svg>Drama</button>
+  <button data-t="settings"><svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Settings</button>
+</nav>
+
+<div id="player">
+  <button id="close">←</button>
+  <div id="lv">
+    <div class="lv-wave"><i></i><i></i><i></i></div>
+    <div class="lv-core"><img alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg></div>
+    <div class="lv-eq" id="lveq"></div>
+    <div class="lv-t">Tuning in</div>
+    <div class="lv-n" id="lvn"></div>
+    <div class="lv-s" id="lvs"></div>
+    <div class="lv-tag"><b></b>LIVE</div>
+    <div class="lv-scan"></div>
+  </div>
+  <video id="video" controls playsinline autoplay></video>
+  <div id="perr"></div>
+  <div id="pinfo">
+    <h3 id="ptitle"></h3><p id="pdesc"></p>
+    <div class="acts">
+      <button class="gb" id="fav">♡ Save</button>
+      <button class="gb" id="pip">⧉ PiP</button>
+      <button class="gb" id="retry">↻ Retry</button>
+      <button class="gb" id="dl"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>Download</button>
+    </div>
+    <div id="more"></div>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+
+<script>
+"JET-FLIX".split("").forEach((c,i)=>{const s=document.createElement("span");s.textContent=c;s.style.setProperty("--i",i);document.getElementById("logo").appendChild(s)});
+</script>
+
+<script type="module">
+import { getItems } from "./app.js";
+const $ = id => document.getElementById(id);
+const names = {channels:"Live TV",movies:"Movies",series:"Series",dramas:"Drama"};
+const data = {}, cache = {};
+const pal = ["229,9,20","30,136,229","142,36,170","0,150,136","245,124,0","67,160,71","216,27,96","94,53,177"];
+let tab="home", hls=null, mpg=null, hero=[], hi=0, timer=null, cur=null;
+
+// Your own Cloudflare Worker proxy
+const PROXY="https://jetproxy.rahmanjarif67.workers.dev/?url=";
+
+let weak=false;
+try{
+  const s=localStorage.getItem("weak");
+  if(s===null){
+    const t=(navigator.connection&&navigator.connection.effectiveType)||"";
+    weak=/2g|3g/.test(t);
+  } else weak=s==="1";
+}catch(e){}
+function applyWeak(){ document.body.classList.toggle("weak",weak); }
+applyWeak();
+
+/* ---------- Local storage helpers (My List / Recently Watched) ---------- */
+const ls=(k,d=[])=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const isFav=it=>ls("favs").includes(it.id);
+function toggleFav(it){
+  let f=ls("favs");
+  f=f.includes(it.id)?f.filter(x=>x!==it.id):[it.id,...f];
+  lsSet("favs",f);
+}
+function addRecent(it){
+  lsSet("recent",[it.id,...ls("recent").filter(x=>x!==it.id)].slice(0,15));
+}
+function byId(id){
+  for(const c of Object.keys(names)){
+    const x=(data[c]||[]).find(i=>i.id===id);
+    if(x) return {it:x,c};
+  }
+  return null;
+}
+
+const hideSplash = () => { const s=$("splash"); if(!s) return; s.classList.add("hide"); setTimeout(()=>s.remove(),800); };
+const splashMin = new Promise(r=>setTimeout(r,3000));
+function pick(n){let h=0;for(const ch of (n||""))h=(h*31+ch.charCodeAt(0))>>>0;return pal[h%pal.length]}
+
+function ytId(u){
+  const m=(u||"").match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([\w-]{11})/);
+  return m?m[1]:null;
+}
+
+/* ---------- Token helper ---------- */
+// item.tokenApi : your own API that returns {url:"fresh signed link"}
+// item.headers  : e.g. {"Authorization":"Bearer xxx"}
+// item.ref      : Referer for the Worker
+// item.proxies  : e.g. ["https://my.workers.dev/?url={url}"]
+async function freshUrl(it){
+  if(!it.tokenApi) return it.url||"";
+  try{
+    const r=await fetch(it.tokenApi,{cache:"no-store"});
+    const j=await r.json();
+    return j.url||it.url||"";
+  }catch(e){ return it.url||""; }
+}
+
+function imgOf(it){
+  if(it.img) return it.img;
+  const id=ytId(it.url);
+  return id?"https://img.youtube.com/vi/"+id+(weak?"/mqdefault.jpg":"/hqdefault.jpg"):"";
+}
+
+function colorOf(it){
+  return new Promise(res=>{
+    const u = imgOf(it);
+    if(!u||weak) return res(pick(it.name));
+    if(cache[u]) return res(cache[u]);
+    const im = new Image(); im.crossOrigin="anonymous";
+    im.onload = ()=>{
+      let c;
+      try{
+        const cv=document.createElement("canvas"); cv.width=cv.height=10;
+        const x=cv.getContext("2d"); x.drawImage(im,0,0,10,10);
+        const d=x.getImageData(0,0,10,10).data;
+        let r=0,g=0,b=0,n=0;
+        for(let i=0;i<d.length;i+=4){
+          const mx=Math.max(d[i],d[i+1],d[i+2]), mn=Math.min(d[i],d[i+1],d[i+2]);
+          if(mx<45||mn>215||mx-mn<25) continue;
+          r+=d[i];g+=d[i+1];b+=d[i+2];n++;
+        }
+        if(!n) throw 0;
+        r/=n;g/=n;b/=n;
+        const m=Math.max(r,g,b);
+        if(m<170){const k=170/m;r*=k;g*=k;b*=k}
+        c=[r,g,b].map(v=>Math.min(255,Math.round(v))).join(",");
+      }catch(e){ c=pick(it.name) }
+      cache[u]=c; res(c);
+    };
+    im.onerror=()=>res(pick(it.name));
+    im.src=u;
+  });
+}
+const setAccent = c => document.documentElement.style.setProperty("--ac", c);
+
+async function loadAll(){
+  $("main").innerHTML = "<p class='empty'>Loading...</p>";
+  try{
+    for(const c of Object.keys(names)){
+      data[c] = await getItems(c);
+      data[c].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    }
+  }catch(e){ $("main").innerHTML="<p class='empty'>Could not load data. Check your internet.</p>"; }
+  render();
+  await splashMin; hideSplash();
+}
+
+function card(it,col){
+  const d=document.createElement("div");
+  d.className="card"+(col==="channels"?" ch":"");
+  d.innerHTML=(col==="channels"?'<span class="live">LIVE</span>':"")+'<div class="im"><img loading="lazy" onerror="this.style.visibility=\'hidden\'"></div><p></p>';
+  d.querySelector("img").src=imgOf(it);
+  d.querySelector("p").textContent=it.name;
+  colorOf(it).then(c=>d.style.setProperty("--c",c));
+  d.onclick=()=>play(it);
+  return d;
+}
+
+function showHero(){
+  if(!hero.length) return;
+  const it=hero[hi], h=$("hero");
+  if(!h) return;
+  const im=imgOf(it);
+  h.style.backgroundImage = im ? `url("${im}")` : "none";
+  h.querySelector("h2").textContent=it.name;
+  h.querySelector("small").textContent=[it.cat,it.year].filter(Boolean).join(" • ");
+  h.querySelector(".dots").innerHTML=hero.map((_,i)=>`<i class="${i===hi?"on":""}"></i>`).join("");
+  h.classList.remove("fade"); void h.offsetWidth; h.classList.add("fade");
+  h.querySelector("button").onclick=()=>play(it);
+  colorOf(it).then(c=>{ if(tab==="home") setAccent(c); });
+}
+
+function renderSettings(){
+  const m=$("main");
+  m.innerHTML=`<div class="set">
+  <h2>Settings</h2>
+  <div class="gl"><div class="trow">
+    <div><b>Weak WiFi Mode</b><small>Uses lowest video quality, smaller images and no animations. Saves data on slow internet.</small></div>
+    <label class="sw"><input type="checkbox" id="wk" ${weak?"checked":""}><span></span></label>
+  </div></div>
+  <div class="gl"><div class="trow">
+    <div><b>Clear history</b><small>Removes Recently Watched and remembered playback methods. My List stays.</small></div>
+    <button class="gb" id="clh" style="margin:0">Clear</button>
+  </div></div>
+  <div class="gl">
+    <details open><summary>User Policy</summary>
+    <p>By using JET-FLIX you agree to use the app lawfully and only for personal, non-commercial viewing. You must not copy, record, redistribute or resell any content shown in the app. We may update these terms at any time, and continued use means you accept the changes.</p></details>
+    <details><summary>Privacy Policy</summary>
+    <p>We respect your privacy. The app does not ask for your name, phone number or location. Basic technical data (such as device type and error logs) may be processed by our hosting and database providers (Netlify, Google Firebase) only to keep the service running. Your settings, My List and Recently Watched are stored on your own device. We do not sell your data to anyone.</p></details>
+    <details><summary>Content Disclaimer</summary>
+    <p>Some videos are played from third-party platforms such as YouTube, and some channels are streamed from public sources. All titles, logos and trademarks belong to their respective owners. If you are a copyright owner and want any content removed, please contact the developer and it will be reviewed and removed promptly.</p></details>
+    <details><summary>Download Policy</summary>
+    <p>Downloads are available only for videos that provide a direct file link. Download only content you have the right to save, and do not share downloaded files publicly.</p></details>
+    <details><summary>Third-Party Services</summary>
+    <p>This app uses Google Firebase, YouTube embedded player, HLS.js and mpegts.js. Those services have their own terms and privacy policies.</p></details>
+  </div>
+  <div class="gl about">
+    <div class="big">JET-FLIX</div>
+    <p>Version 1.6</p>
+    <p>Developed by<br><span class="nm">ZARIF RAHMAN</span></p>
+    <p>Developer Company<br><span class="nm">ZSC (Zarif Software Corporation)</span></p>
+    <p>© 2026 ZSC. All Rights Reserved.</p>
+  </div>
+  </div>`;
+  m.querySelectorAll(".set .gl").forEach((g,i)=>g.style.setProperty("--d",i));
+  $("wk").onchange=e=>{
+    weak=e.target.checked;
+    try{localStorage.setItem("weak",weak?"1":"0")}catch(x){}
+    applyWeak();
+  };
+  $("clh").onclick=()=>{
+    try{
+      localStorage.removeItem("recent");
+      Object.keys(localStorage).filter(k=>k.startsWith("w:")).forEach(k=>localStorage.removeItem(k));
+    }catch(e){}
+    $("clh").textContent="Done ✓";
+  };
+}
+
+function render(){
+  clearInterval(timer);
+  document.body.classList.toggle("st",tab==="settings");
+  const q=$("search").value.trim().toLowerCase(), m=$("main");
+  $("sclr").style.display=q?"block":"none";
+  if(tab==="settings"){ renderSettings(); return; }
+  m.innerHTML="";
+  const filt=a=>(a||[]).filter(i=>!q||(i.name||"").toLowerCase().includes(q));
+  if(tab==="home"&&!q){
+    hero=[...(data.movies||[]),...(data.series||[])].filter(i=>imgOf(i)).slice(0,5);
+    if(hero.length){
+      const h=document.createElement("div");
+      h.id="hero";
+      h.innerHTML='<div class="hc"><h2></h2><small></small><button>▶ Play</button><div class="dots"></div></div>';
+      m.appendChild(h); hi=0; showHero();
+      if(!weak) timer=setInterval(()=>{hi=(hi+1)%hero.length;showHero()},5000);
+    }
+    // My List + Recently Watched
+    [["favs","♥ My List"],["recent","Recently Watched"]].forEach(([k,title])=>{
+      const list=ls(k).map(byId).filter(Boolean);
+      if(!list.length) return;
+      const s=document.createElement("div"); s.className="sec";
+      s.innerHTML=`<h2></h2><div class="row"></div>`;
+      s.querySelector("h2").textContent=title;
+      list.forEach(o=>s.querySelector(".row").appendChild(card(o.it,o.c)));
+      m.appendChild(s);
+    });
+    Object.keys(names).forEach(c=>{
+      const list=filt(data[c]); if(!list.length) return;
+      const s=document.createElement("div"); s.className="sec";
+      s.innerHTML=`<h2>${names[c]}</h2><div class="row"></div>`;
+      list.slice(0,weak?8:15).forEach(it=>s.querySelector(".row").appendChild(card(it,c)));
+      m.appendChild(s);
+    });
+    if(!m.children.length) m.innerHTML="<p class='empty'>Nothing added yet</p>";
+    return;
+  }
+  if(tab!=="home"){ const t=document.createElement("div"); t.className="ttl"; t.textContent=names[tab]; m.appendChild(t); }
+  const cols=tab==="home"?Object.keys(names):[tab];
+  const g=document.createElement("div"); g.className="grid";
+  cols.forEach(c=>filt(data[c]).forEach(it=>g.appendChild(card(it,c))));
+  m.appendChild(g);
+  if(!g.children.length) m.innerHTML="<p class='empty'>No results found</p>";
+}
+
+/* ---------- Up Next / More like this ---------- */
+function showMore(it){
+  const box=$("more"); box.innerHTML="";
+  const col=Object.keys(names).find(c=>(data[c]||[]).some(x=>x.id===it.id));
+  if(!col) return;
+  const list=data[col].filter(x=>x.id!==it.id);
+  const same=list.filter(x=>it.cat&&x.cat===it.cat);
+  const rest=list.filter(x=>!same.includes(x));
+  const items=[...same,...rest].slice(0,12);
+  if(!items.length) return;
+  const next=items[0];
+  const h=document.createElement("h4"); h.textContent="Up Next"; box.appendChild(h);
+  const n=document.createElement("div"); n.className="gl";
+  n.innerHTML="<b></b><br><small></small>";
+  n.querySelector("b").textContent=next.name;
+  n.querySelector("small").textContent=[next.cat,next.year].filter(Boolean).join(" • ");
+  n.onclick=()=>play(next);
+  box.appendChild(n);
+  const h2=document.createElement("h4");
+  h2.textContent=same.length?"More like this":"You may also like";
+  box.appendChild(h2);
+  const r=document.createElement("div"); r.className="row";
+  items.forEach(x=>r.appendChild(card(x,col)));
+  box.appendChild(r);
+}
+
+/* ---------- Player ---------- */
+function stopAll(){
+  const v=$("video");
+  v.onloadedmetadata=null; v.onloadeddata=null; v.onerror=null;
+  v.pause(); v.removeAttribute("src"); v.load();
+  if(hls){try{hls.destroy()}catch(e){} hls=null}
+  if(mpg){try{mpg.destroy()}catch(e){} mpg=null}
+  const yf=document.getElementById("yf"); if(yf) yf.remove();
+}
+
+/* ---------- Auto fallback engine ---------- */
+let lastErr="";
+// Public CORS proxies (they get loader-wrapped; your own Worker is a separate step)
+const PROXIES=[
+  {n:"corsproxy", f:u=>"https://corsproxy.io/?url="+encodeURIComponent(u)},
+  {n:"allorigins",f:u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u)},
+  {n:"codetabs",  f:u=>"https://api.codetabs.com/v1/proxy?quest="+encodeURIComponent(u)},
+  {n:"thingproxy",f:u=>"https://thingproxy.freeboard.io/fetch/"+u}
+];
+const hostOf=u=>{try{return new URL(u).host}catch(e){return u}};
+const memGet=h=>{try{return localStorage.getItem("w:"+h)}catch(e){return null}};
+const memSet=(h,m)=>{try{localStorage.setItem("w:"+h,m)}catch(e){}};
+const memDel=h=>{try{localStorage.removeItem("w:"+h)}catch(e){}};
+
+function baseCfg(){
+  const b={manifestLoadingMaxRetry:1,levelLoadingMaxRetry:2,fragLoadingMaxRetry:3};
+  if(weak) Object.assign(b,{startLevel:0,capLevelToPlayerSize:true,maxBufferLength:60,maxMaxBufferLength:90});
+  return b;
+}
+function hasHdr(it){return !!(it&&it.headers&&Object.keys(it.headers).length)}
+function wrapLoader(wrap){
+  const Base=Hls.DefaultConfig.loader;
+  return class extends Base{ load(ctx,cfg,cb){ ctx.url=wrap(ctx.url); super.load(ctx,cfg,cb); } };
+}
+
+function tryNative(v,src){
+  return new Promise(res=>{
+    if(!v.canPlayType("application/vnd.apple.mpegurl")) return res(false);
+    v.src=src;
+    const t=setTimeout(()=>fin(false),7000);
+    const fin=ok=>{
+      clearTimeout(t); v.onloadedmetadata=null; v.onerror=null;
+      if(ok) v.play().catch(()=>{}); else { v.removeAttribute("src"); v.load(); lastErr="native failed"; }
+      res(ok);
+    };
+    v.onloadedmetadata=()=>fin(true);
+    v.onerror=()=>fin(false);
+  });
+}
+
+function tryHls(v,src,cfg,wrap){
+  return new Promise(res=>{
+    if(!(window.Hls&&Hls.isSupported())){ lastErr="hls.js unsupported"; return res(false); }
+    const c=Object.assign({},cfg);
+    if(wrap) c.loader=wrapLoader(wrap);
+    const h=new Hls(c); hls=h;
+    let done=false;
+    const fin=ok=>{
+      if(done) return; done=true;
+      if(!ok){ try{h.destroy()}catch(x){} if(hls===h) hls=null; }
+      res(ok);
+    };
+    h.on(Hls.Events.MANIFEST_PARSED,()=>{
+      if(weak){ h.autoLevelCapping=0; h.currentLevel=0; }
+      v.play().catch(()=>{});
+    });
+    h.on(Hls.Events.FRAG_LOADED,()=>fin(true)); // success only when real data arrives
+    h.on(Hls.Events.ERROR,(e,d)=>{
+      if(!d.fatal) return;
+      const code=d.response&&d.response.code;
+      lastErr=d.details+(code?" ("+code+")":"");
+      if(done){
+        if(d.type===Hls.ErrorTypes.NETWORK_ERROR) h.startLoad();
+        else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) h.recoverMediaError();
+        return;
+      }
+      fin(false);
+    });
+    h.loadSource(src); h.attachMedia(v);
+    setTimeout(()=>{ if(!done&&!lastErr) lastErr="timeout"; fin(false); },9000);
+  });
+}
+
+async function tryTs(v,url){
+  if(!(window.mpegts&&mpegts.getFeatureList().mseLivePlayback)){ lastErr="mpegts unsupported"; return false; }
+  try{
+    mpg=mpegts.createPlayer({type:"mpegts",isLive:true,url});
+    mpg.attachMediaElement(v); mpg.load(); await mpg.play(); return true;
+  }catch(e){
+    try{mpg&&mpg.destroy()}catch(x){} mpg=null; lastErr="mpegts failed"; return false;
+  }
+}
+
+async function playM3u8(v,url,it){
+  const host=hostOf(url), cfg=baseCfg();
+  const H=hasHdr(it)?it.headers:null;
+  const hdrCfg=Object.assign({},cfg);
+  if(H) hdrCfg.xhrSetup=xhr=>{for(const k in H){try{xhr.setRequestHeader(k,H[k])}catch(e){}}};
+  const mixed=location.protocol==="https:"&&/^http:/i.test(url);
+  const httpsUrl=url.replace(/^http:/i,"https:");
+
+  const steps=[];
+  if(!mixed){
+    if(!H) steps.push({id:"native",n:"Native",f:()=>tryNative(v,url)});
+    steps.push({id:"hls",n:"HLS.js",f:()=>tryHls(v,url,hdrCfg)});
+  }else{
+    steps.push({id:"https",n:"HTTPS swap",f:()=>tryHls(v,httpsUrl,cfg)});
+  }
+  (it.proxies||[]).forEach((p,i)=>steps.push({id:"cp"+i,n:"Custom "+(i+1),f:()=>tryHls(v,url,cfg,u=>p.replace("{url}",encodeURIComponent(u)))}));
+  // Your Worker rewrites the playlist itself, so no loader wrap here
+  steps.push({id:"worker",n:"My Worker",f:()=>tryHls(v,
+    PROXY+encodeURIComponent(url)+(it.ref?"&ref="+encodeURIComponent(it.ref):"")+(H?"&h="+encodeURIComponent(JSON.stringify(H)):""),cfg)});
+  PROXIES.forEach(p=>steps.push({id:"p:"+p.n,n:p.n,f:()=>tryHls(v,url,cfg,p.f)}));
+  if(!/m3u8/i.test(url)) steps.push({id:"ts",n:"TS stream",f:()=>tryTs(v,url)});
+  steps.push({id:"raw",n:"Raw video",f:()=>new Promise(r=>{
+    v.src=url; const t=setTimeout(()=>r(false),6000);
+    v.onloadeddata=()=>{clearTimeout(t);v.play().catch(()=>{});r(true)};
+    v.onerror=()=>{clearTimeout(t);lastErr="raw video error";r(false)};
+  })});
+
+  // Method that worked last time for this host goes first
+  const last=memGet(host);
+  if(last){ const i=steps.findIndex(s=>s.id===last); if(i>0) steps.unshift(steps.splice(i,1)[0]); }
+
+  const log=[];
+  for(let i=0;i<steps.length;i++){
+    if(cur!==it) return false;
+    const s=steps[i];
+    $("perr").textContent="Trying "+s.n+" ("+(i+1)+"/"+steps.length+")...";
+    stopAll();
+    v.style.display="";
+    lastErr="";
+    if(await s.f()){ memSet(host,s.id); return true; }
+    log.push(s.n+": "+(lastErr||"failed"));
+    if(s.id===last) memDel(host);
+  }
+  lastErr="\n"+log.join("\n");
+  return false;
+}
+
+function updFav(){
+  const b=$("fav");
+  if(!cur){return}
+  const on=isFav(cur);
+  b.classList.toggle("on",on);
+  b.textContent=on?"♥ Saved":"♡ Save";
+}
+
+async function play(it){
+  const v=$("video");
+  stopAll();
+  cur=it;
+  addRecent(it);
+  $("perr").textContent="";
+  $("retry").style.display="none";
+  $("pip").style.display=(document.pictureInPictureEnabled&&!ytId(it.url))?"inline-flex":"none";
+  $("ptitle").textContent=it.name;
+  $("pdesc").textContent=[it.cat,it.year,it.desc].filter(Boolean).join(" • ");
+  updFav();
+  colorOf(it).then(setAccent);
+  $("player").classList.add("show");
+  $("pinfo").scrollTop=0;
+  showMore(it);
+
+  const url=await freshUrl(it);
+  if(cur!==it) return;
+  $("dl").style.display=/\.mp4(\?|#|$)/i.test(url)?"inline-flex":"none";
+
+  const id=ytId(url);
+  if(id){
+    v.style.display="none";
+    const yf=document.createElement("iframe");
+    yf.id="yf";
+    yf.src="https://www.youtube.com/embed/"+id+"?autoplay=1&playsinline=1&rel=0&fs=1"+(weak?"&vq=small":"");
+    yf.allow="autoplay; encrypted-media; fullscreen; picture-in-picture";
+    yf.allowFullscreen=true;
+    yf.style.cssText="width:100%;aspect-ratio:16/9;border:0;margin-top:56px;background:#000;flex:0 0 auto";
+    $("player").insertBefore(yf,$("perr"));
+    return;
+  }
+
+  v.style.display="";
+  $("perr").textContent="Loading...";
+  lastErr="";
+  let ok=false;
+  if(/m3u8/i.test(url)) ok=await playM3u8(v,url,it);
+  else if(/\.ts(\?|#|$)/i.test(url)){ ok=await tryTs(v,url); }
+  else { v.src=url; v.play().catch(()=>{}); ok=true; }
+
+  if(cur!==it) return;
+  $("perr").textContent=ok?"":"Cannot play:"+(lastErr?(lastErr.startsWith("\n")?lastErr:" "+lastErr):" unknown");
+  $("retry").style.display=ok?"none":"inline-flex";
+}
+
+$("fav").onclick=()=>{ if(!cur) return; toggleFav(cur); updFav(); };
+$("pip").onclick=async()=>{
+  const v=$("video");
+  try{
+    if(document.pictureInPictureElement) await document.exitPictureInPicture();
+    else await v.requestPictureInPicture();
+  }catch(e){}
+};
+$("retry").onclick=()=>{
+  if(!cur) return;
+  const it=cur;
+  const h=hostOf(it.url||""); memDel(h);
+  play(it);
+};
+$("dl").onclick=()=>{
+  if(!cur||!cur.url) return;
+  const a=document.createElement("a");
+  a.href=cur.url; a.download=(cur.name||"video")+".mp4"; a.target="_blank"; a.rel="noopener";
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+/* Fullscreen -> landscape (works in browser and in the Capacitor APK) */
+function onFs(){
+  const fs=document.fullscreenElement||document.webkitFullscreenElement;
+  const SO=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.ScreenOrientation;
+  try{
+    if(SO){ fs?SO.lock({orientation:"landscape"}):SO.unlock(); }
+    else if(fs){ screen.orientation.lock("landscape").catch(()=>{}); }
+    else { screen.orientation.unlock(); }
+  }catch(e){}
+}
+document.addEventListener("fullscreenchange",onFs);
+document.addEventListener("webkitfullscreenchange",onFs);
+
+$("close").onclick=()=>{
+  cur=null;
+  stopAll();
+  $("video").style.display="";
+  $("perr").textContent="";
+  $("player").classList.remove("show");
+  if(tab==="home"&&!$("search").value.trim()){ const y=scrollY; render(); scrollTo(0,y); }
+};
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); tab=b.dataset.t; render(); scrollTo(0,0);
+  };
+});
+$("search").oninput=render;
+$("sclr").onclick=()=>{ $("search").value=""; render(); $("search").focus(); };
+
+/* ---------- Liquid glass ripple (everywhere) ---------- */
+const RIP=".gl,.gb,.card .im,nav button,#hero button,#close,.sbox";
+document.addEventListener("pointerdown",e=>{
+  const g=e.target.closest&&e.target.closest(RIP);
+  if(!g||weak) return;
+  const r=g.getBoundingClientRect();
+  const s=document.createElement("span");
+  s.className="rip";
+  s.style.left=(e.clientX-r.left)+"px";
+  s.style.top=(e.clientY-r.top)+"px";
+  g.appendChild(s);
+  setTimeout(()=>s.remove(),850);
+  if(g.classList.contains("gl")){
+    g.classList.add("press");
+    const up=()=>{g.classList.remove("press");["pointerup","pointercancel","pointerleave"].forEach(t=>g.removeEventListener(t,up))};
+    ["pointerup","pointercancel","pointerleave"].forEach(t=>g.addEventListener(t,up));
+  }
+});
+
+/* ---------- Long press: glass breaks -> 3s -> water drops -> glass restored ---------- */
+const cv=$("fx"), cx=cv.getContext("2d");
+let W=0,H=0,fst="idle",ft0=0,cracks=[],rings=[],maxR=0,drops=[],holdT=null,hx=0,hy=0,lastT=0;
+function rs(){const D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;cx.setTransform(D,0,0,D,0,0)}
+rs(); addEventListener("resize",rs);
+
+function mkCracks(x,y){
+  cracks=[]; rings=[];
+  maxR=Math.hypot(Math.max(x,W-x),Math.max(y,H-y));
+  const n=16+Math.floor(Math.random()*6);
+  const line=(px,py,a,L,r0)=>{
+    const pts=[[px,py,r0]]; let r=r0;
+    while(r<r0+L){
+      const s=14+Math.random()*34; a+=(Math.random()-.5)*.4;
+      px+=Math.cos(a)*s; py+=Math.sin(a)*s; r+=s; pts.push([px,py,r]);
+      if(Math.random()<.12&&r>r0+40&&cracks.length<90){
+        line(px,py,a+(Math.random()<.5?-1:1)*(.5+Math.random()*.5),40+Math.random()*110,r);
+      }
+    }
+    cracks.push(pts);
+  };
+  const main=[];
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2+Math.random()*.25;
+    line(x,y,a,maxR*(.35+Math.random()*.65),0);
+    main.push(cracks.length-1);
+  }
+  [60,125,210,320,450].forEach(R=>{
+    for(let i=0;i<n;i++){
+      const A=cracks[main[i]],B=cracks[main[(i+1)%n]];
+      const pa=A.find(p=>p[2]>=R),pb=B.find(p=>p[2]>=R);
+      if(pa&&pb&&Math.random()<.85) rings.push([pa[0],pa[1],pb[0],pb[1],R]);
+    }
+  });
+}
+
+function drawCracks(p,a){
+  if(a<=0) return;
+  const lim=p*maxR;
+  cx.lineJoin="round"; cx.lineCap="round";
+  for(const pass of [0,1]){
+    cx.strokeStyle=pass?`rgba(255,255,255,${.9*a})`:`rgba(120,200,255,${.28*a})`;
+    cx.lineWidth=pass?1.1:3.2;
+    cx.beginPath();
+    for(const pts of cracks){
+      if(pts[0][2]>lim) continue;
+      cx.moveTo(pts[0][0],pts[0][1]);
+      for(let i=1;i<pts.length;i++){ if(pts[i][2]>lim) break; cx.lineTo(pts[i][0],pts[i][1]); }
+    }
+    for(const r of rings){ if(r[4]>lim) continue; cx.moveTo(r[0],r[1]); cx.lineTo(r[2],r[3]); }
+    cx.stroke();
+  }
+}
+
+function spawnDrop(){
+  const r=3+Math.random()*8;
+  drops.push({x:Math.random()*W,y:-12,r,v:2.5+Math.random()*3+r*.15,w:Math.random()*6.28});
+}
+function drawDrops(dt){
+  for(let i=drops.length-1;i>=0;i--){
+    const d=drops[i];
+    d.v*=1+.012*dt; d.y+=d.v*dt; d.w+=.15*dt; d.x+=Math.sin(d.w)*.35;
+    if(d.y-d.r*4>H){ drops.splice(i,1); continue; }
+    const tl=d.r*9+d.v*4;
+    const g=cx.createLinearGradient(0,d.y-tl,0,d.y);
+    g.addColorStop(0,"rgba(180,225,255,0)"); g.addColorStop(1,"rgba(180,225,255,.35)");
+    cx.fillStyle=g; cx.fillRect(d.x-d.r*.35,d.y-tl,d.r*.7,tl);
+    const rg=cx.createRadialGradient(d.x-d.r*.3,d.y-d.r*.35,d.r*.1,d.x,d.y,d.r*1.2);
+    rg.addColorStop(0,"rgba(255,255,255,.95)"); rg.addColorStop(.45,"rgba(170,215,255,.55)"); rg.addColorStop(1,"rgba(120,180,240,.25)");
+    cx.fillStyle=rg; cx.beginPath(); cx.ellipse(d.x,d.y,d.r,d.r*1.35,0,0,6.2832); cx.fill();
+    cx.strokeStyle="rgba(255,255,255,.55)"; cx.lineWidth=1; cx.stroke();
+  }
+}
+
+function frame(now){
+  const e=now-ft0, dt=Math.min(3,(now-lastT)/16.7||1); lastT=now;
+  cx.clearRect(0,0,W,H);
+  if(fst==="crack"){
+    const p=Math.min(1,e/450);
+    drawCracks(p,1);
+    cx.fillStyle=`rgba(255,255,255,${.35*(1-p)})`; cx.fillRect(0,0,W,H);
+    if(p>=1){ fst="hold"; ft0=now; }
+  }else if(fst==="hold"){
+    cx.fillStyle="rgba(255,255,255,.035)"; cx.fillRect(0,0,W,H);
+    drawCracks(1,1);
+    if(e>3000){ fst="water"; ft0=now; }
+  }else if(fst==="water"){
+    const T=3400, h=Math.min(1,e/T);
+    cx.fillStyle=`rgba(140,200,255,${.12*Math.sin(Math.PI*h)})`; cx.fillRect(0,0,W,H);
+    drawCracks(1,1-h*h);
+    if(e<2300&&Math.random()<.55*dt) spawnDrop();
+    drawDrops(dt);
+    if(e>T){ fst="done"; ft0=now; drops=[]; }
+  }else if(fst==="done"){
+    const p=Math.min(1,e/500);
+    cx.fillStyle=`rgba(255,255,255,${.25*(1-p)})`; cx.fillRect(0,0,W,H);
+    if(p>=1){ fst="idle"; cx.clearRect(0,0,W,H); return; }
+  }
+  requestAnimationFrame(frame);
+}
+function startFx(x,y){
+  if(weak||fst!=="idle") return;
+  mkCracks(x,y);
+  fst="crack"; ft0=performance.now(); lastT=ft0;
+  document.body.classList.add("shake");
+  setTimeout(()=>document.body.classList.remove("shake"),460);
+  try{navigator.vibrate&&navigator.vibrate([40,30,60])}catch(e){}
+  requestAnimationFrame(frame);
+}
+document.addEventListener("pointerdown",e=>{
+  if(weak||fst!=="idle"||(e.target.closest&&e.target.closest("video,input,iframe"))) return;
+  hx=e.clientX; hy=e.clientY;
+  clearTimeout(holdT);
+  holdT=setTimeout(()=>startFx(hx,hy),800);
+});
+document.addEventListener("pointermove",e=>{ if(holdT&&Math.hypot(e.clientX-hx,e.clientY-hy)>12){clearTimeout(holdT);holdT=null} });
+["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{clearTimeout(holdT);holdT=null}));
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+/* ===== v1.6: language, live loader, maintenance ===== */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let lang=(()=>{try{return localStorage.getItem("lang")||"en"}catch(e){return "en"}})();
+const D={
+"Home":["হোম","الرئيسية"],"Live":["লাইভ","مباشر"],"LIVE":["লাইভ","مباشر"],"Movies":["মুভি","أفلام"],"Series":["সিরিজ","مسلسلات"],"Drama":["ড্রামা","دراما"],"Settings":["সেটিংস","الإعدادات"],"Live TV":["লাইভ টিভি","البث المباشر"],
+"♥ My List":["♥ আমার তালিকা","♥ قائمتي"],"Recently Watched":["সম্প্রতি দেখা","شوهد مؤخراً"],"Up Next":["এরপর","التالي"],"More like this":["এরকম আরও","المزيد مثله"],"You may also like":["আপনার ভালো লাগতে পারে","قد يعجبك أيضاً"],
+"▶ Play":["▶ চালান","▶ تشغيل"],"♡ Save":["♡ সেভ","♡ حفظ"],"♥ Saved":["♥ সেভ হয়েছে","♥ تم الحفظ"],"⧉ PiP":["⧉ ছোট উইন্ডো","⧉ نافذة صغيرة"],"↻ Retry":["↻ আবার","↻ أعد المحاولة"],"Download":["ডাউনলোড","تنزيل"],
+"Loading...":["লোড হচ্ছে...","جارٍ التحميل..."],"Nothing added yet":["এখনো কিছু যোগ হয়নি","لم تتم إضافة شيء بعد"],"No results found":["কিছু পাওয়া যায়নি","لا توجد نتائج"],
+"Search movies, series, live TV...":["মুভি, সিরিজ, লাইভ টিভি খুঁজুন...","ابحث عن أفلام ومسلسلات وبث مباشر..."],
+"Weak WiFi Mode":["দুর্বল ওয়াইফাই মোড","وضع الواي فاي الضعيف"],
+"Uses lowest video quality, smaller images and no animations. Saves data on slow internet.":["সর্বনিম্ন ভিডিও কোয়ালিটি, ছোট ছবি ও অ্যানিমেশন বন্ধ। ধীর ইন্টারনেটে ডেটা বাঁচায়।","أقل جودة فيديو وصور أصغر وبدون حركات. يوفر البيانات على الإنترنت البطيء."],
+"Clear history":["হিস্ট্রি মুছুন","مسح السجل"],
+"Removes Recently Watched and remembered playback methods. My List stays.":["সম্প্রতি দেখা ও মনে রাখা প্লে পদ্ধতি মুছবে। আমার তালিকা থাকবে।","يزيل المشاهدات الأخيرة وطرق التشغيل المحفوظة. تبقى قائمتي."],
+"Clear":["মুছুন","مسح"],"Done ✓":["হয়েছে ✓","تم ✓"],
+"User Policy":["ব্যবহারকারী নীতি","سياسة المستخدم"],"Privacy Policy":["গোপনীয়তা নীতি","سياسة الخصوصية"],"Content Disclaimer":["কনটেন্ট দাবিত্যাগ","إخلاء مسؤولية المحتوى"],"Download Policy":["ডাউনলোড নীতি","سياسة التنزيل"],"Third-Party Services":["তৃতীয় পক্ষের সেবা","خدمات الطرف الثالث"],
+"Language":["ভাষা","اللغة"],"Maintenance":["রক্ষণাবেক্ষণ","الصيانة"],"Device Information":["ডিভাইসের তথ্য","معلومات الجهاز"],"Memory and Storage":["মেমোরি ও স্টোরেজ","الذاكرة والتخزين"],
+"Model":["মডেল","الطراز"],"System":["সিস্টেম","النظام"],"Browser":["ব্রাউজার","المتصفح"],"Screen":["স্ক্রিন","الشاشة"],"CPU cores":["সিপিইউ কোর","أنوية المعالج"],"Network":["নেটওয়ার্ক","الشبكة"],"Battery":["ব্যাটারি","البطارية"],"Time zone":["টাইম জোন","المنطقة الزمنية"],
+"Online":["অনলাইন","متصل"],"Offline":["অফলাইন","غير متصل"],
+"RAM (approx.)":["র‍্যাম (আনুমানিক)","الذاكرة RAM (تقريباً)"],"App memory (JS heap)":["অ্যাপের মেমোরি","ذاكرة التطبيق"],"Storage used by app (ROM)":["অ্যাপের স্টোরেজ (রম)","تخزين التطبيق (ROM)"],"Cache":["ক্যাশ","الذاكرة المؤقتة"],"Saved data":["সংরক্ষিত ডেটা","البيانات المحفوظة"],
+"Clear cache":["ক্যাশ মুছুন","مسح الذاكرة المؤقتة"],"Clear all data":["সব ডেটা মুছুন","مسح كل البيانات"],
+"Clear cache removes cached files and refreshes the app. Clear all data also removes My List, history and settings.":["ক্যাশ মুছলে ক্যাশ ফাইল মুছে অ্যাপ রিফ্রেশ হবে। সব ডেটা মুছলে আমার তালিকা, হিস্ট্রি ও সেটিংসও মুছবে।","مسح الذاكرة المؤقتة يزيل الملفات المؤقتة ويحدّث التطبيق. مسح كل البيانات يزيل أيضاً قائمتي والسجل والإعدادات."],
+"Clear cache?":["ক্যাশ মুছবেন?","مسح الذاكرة المؤقتة؟"],"This removes cached files and refreshes the app. My List and settings stay.":["ক্যাশ ফাইল মুছে অ্যাপ রিফ্রেশ হবে। আমার তালিকা ও সেটিংস থাকবে।","سيتم حذف الملفات المؤقتة وتحديث التطبيق. تبقى قائمتي والإعدادات."],
+"Clear all data?":["সব ডেটা মুছবেন?","مسح كل البيانات؟"],"This removes cache, My List, history and settings, then refreshes the app.":["ক্যাশ, আমার তালিকা, হিস্ট্রি ও সেটিংস মুছে অ্যাপ রিফ্রেশ হবে।","سيتم حذف الذاكرة المؤقتة وقائمتي والسجل والإعدادات ثم تحديث التطبيق."],
+"Cancel":["বাতিল","إلغاء"],"Clear all":["সব মুছুন","مسح الكل"],"Refreshing...":["রিফ্রেশ হচ্ছে...","جارٍ التحديث..."],
+"Tuning in":["সিগন্যাল ধরা হচ্ছে","جارٍ ضبط الإشارة"]
+};
+const tx=k=>lang==="en"?k:((D[k]||[])[lang==="bn"?0:1]||k);
+function trNode(n){
+  const raw=n.nodeValue,s=raw.trim(); if(!s) return;
+  let en=n.__en;
+  if(en&&s!==en&&s!==tx(en)) en=n.__en=null;
+  if(!en){ if(!D[s]) return; en=n.__en=s; }
+  const out=raw.replace(s,()=>tx(en));
+  if(out!==raw) n.nodeValue=out;
+}
+function trTree(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const a=[]; while(w.nextNode()) a.push(w.currentNode);
+  a.forEach(trNode);
+}
+function setLang(l){
+  lang=l; try{localStorage.setItem("lang",l)}catch(e){}
+  const h=document.documentElement; h.lang=l; h.dir=l==="ar"?"rtl":"ltr";
+  trTree(document.body);
+  $("search").placeholder=tx("Search movies, series, live TV...");
+  document.querySelectorAll("#lg .gb").forEach(b=>b.classList.toggle("on",b.dataset.l===l));
+}
+new MutationObserver(ms=>{
+  if(lang==="en") return;
+  for(const m of ms){
+    if(m.type==="characterData") trNode(m.target);
+    else m.addedNodes.forEach(n=>n.nodeType===3?trNode(n):n.nodeType===1&&trTree(n));
+  }
+}).observe(document.body,{childList:true,subtree:true,characterData:true});
+
+/* ----- Live TV loader ----- */
+const lv=$("lv"),eqb=$("lveq");
+for(let i=0;i<30;i++){const b=document.createElement("i");b.style.setProperty("--d",(-Math.random()).toFixed(2)+"s");b.style.setProperty("--h",(25+Math.random()*75).toFixed(0)+"%");eqb.appendChild(b)}
+let lvTok=0;
+function showLv(it){
+  $("lvn").textContent=it.name; $("lvs").textContent="";
+  const im=imgOf(it),g=lv.querySelector("img"),s=lv.querySelector("svg");
+  if(im){g.src=im;g.style.display="block";s.style.display="none"}else{g.style.display="none";s.style.display=""}
+  lv.classList.add("show");
+}
+const hideLv=()=>lv.classList.remove("show");
+new MutationObserver(()=>{
+  const t=$("perr").textContent;
+  if(lv.classList.contains("show")&&t&&!/^Cannot/.test(t)) $("lvs").textContent=t;
+}).observe($("perr"),{childList:true,characterData:true,subtree:true});
+$("close").addEventListener("click",()=>{lvTok++;hideLv()});
+const _play=play;
+play=async function(it){
+  const my=++lvTok;
+  if((data.channels||[]).some(x=>x.id===it.id)) showLv(it); else hideLv();
+  await _play(it);
+  if(my!==lvTok) return;
+  const v=$("video");
+  if(ytId(it.url)) await sleep(1500);
+  else if(!/^Cannot/.test($("perr").textContent)&&(v.paused||v.readyState<3))
+    await Promise.race([new Promise(r=>v.addEventListener("playing",r,{once:true})),sleep(4000)]);
+  if(my===lvTok) hideLv();
+};
+
+/* ----- Maintenance ----- */
+const fb=n=>n==null||isNaN(n)?"–":n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":n<1073741824?(n/1048576).toFixed(1)+" MB":(n/1073741824).toFixed(2)+" GB";
+let hv={},mtT=null;
+const IDS=[["i-m","Model"],["i-o","System"],["i-b","Browser"],["i-s","Screen"],["i-c","CPU cores"],["i-n","Network"],["i-bt","Battery"],["i-z","Time zone"]];
+function gask(t,m,ok){
+  return new Promise(res=>{
+    const o=document.createElement("div"); o.className="gm";
+    o.innerHTML='<div class="gl"><b></b><p></p><div class="acts"><button class="gb" data-r="0">Cancel</button><button class="gb on" data-r="1"></button></div></div>';
+    o.querySelector("b").textContent=t; o.querySelector("p").textContent=m; o.querySelector('[data-r="1"]').textContent=ok;
+    o.onclick=e=>{const b=e.target.closest("[data-r]"); if(b||e.target===o){o.remove();res(!!b&&b.dataset.r==="1")}};
+    document.body.appendChild(o);
+  });
+}
+async function wipe(all){
+  try{ if(window.caches) for(const k of await caches.keys()) await caches.delete(k); }catch(e){}
+  try{ for(const r of (await navigator.serviceWorker.getRegistrations())) await r.unregister(); }catch(e){}
+  try{ sessionStorage.clear(); Object.keys(localStorage).filter(k=>k.startsWith("w:")).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  if(all){
+    try{ localStorage.clear(); }catch(e){}
+    try{ if(indexedDB.databases) for(const d of await indexedDB.databases()) indexedDB.deleteDatabase(d.name); }catch(e){}
+  }
+  const o=document.createElement("div"); o.className="gm"; o.innerHTML='<div class="gl"><b>Refreshing...</b></div>';
+  document.body.appendChild(o);
+  setTimeout(()=>location.reload(),700);
+}
+function langCard(){
+  const d=document.createElement("div"); d.className="gl";
+  d.innerHTML='<b>Language</b><div class="acts" id="lg"></div>';
+  [["bn","বাংলা"],["en","English"],["ar","العربية"]].forEach(([c,n])=>{
+    const b=document.createElement("button"); b.className="gb"+(c===lang?" on":""); b.textContent=n; b.dataset.l=c;
+    b.onclick=()=>setLang(c); d.querySelector("#lg").appendChild(b);
+  });
+  return d;
+}
+function maintCard(){
+  const d=document.createElement("div"); d.className="gl"; d.id="mt";
+  d.innerHTML='<b style="font-size:16px">Maintenance</b><div class="mh">Device Information</div>'+
+    IDS.map(([i,l])=>'<div class="mrow"><span>'+l+'</span><b id="'+i+'">–</b></div>').join("")+
+    '<div class="mh">Memory and Storage</div>'+
+    '<div class="mrow"><span>RAM (approx.)</span><b id="m-ram">–</b></div>'+
+    '<div class="mrow"><span>App memory (JS heap)</span><b id="m-heap">–</b></div><div class="mb"><i id="b-heap"></i></div>'+
+    '<div class="mrow"><span>Storage used by app (ROM)</span><b id="m-st">–</b></div><div class="mb"><i id="b-st"></i></div>'+
+    '<div class="mrow"><span>Cache</span><b id="m-ca">–</b></div>'+
+    '<div class="mrow"><span>Saved data</span><b id="m-ls">–</b></div>'+
+    '<div class="acts"><button class="gb" id="m-cc">Clear cache</button><button class="gb" id="m-all">Clear all data</button></div>'+
+    '<small style="display:block;color:#bbb;font-size:12px;margin-top:10px;line-height:1.5">Clear cache removes cached files and refreshes the app. Clear all data also removes My List, history and settings.</small>';
+  d.querySelector("#m-cc").onclick=async()=>{ if(await gask("Clear cache?","This removes cached files and refreshes the app. My List and settings stay.","Clear")) wipe(false); };
+  d.querySelector("#m-all").onclick=async()=>{ if(await gask("Clear all data?","This removes cache, My List, history and settings, then refreshes the app.","Clear all")) wipe(true); };
+  return d;
+}
+async function mtTick(){
+  if(!$("mt")){ clearInterval(mtT); return; }
+  const nv=navigator,c=nv.connection||{},pm=performance.memory,ua=nv.userAgent;
+  const sv=(i,v)=>{const e=$(i); if(e&&e.textContent!==v) e.textContent=v};
+  const dpr=devicePixelRatio||1;
+  sv("i-m",hv.model||(ua.match(/;\s*([^;)]+?)\s+Build/)||[])[1]||"–");
+  sv("i-o",hv.platformVersion?"Android "+hv.platformVersion.split(".")[0]:(ua.match(/Android [\d.]+/)||[nv.platform||"–"])[0]);
+  sv("i-b",(ua.match(/(SamsungBrowser|Firefox|Chrome|Safari)\/[\d.]+/)||["–"])[0]);
+  sv("i-s",Math.round(screen.width*dpr)+"×"+Math.round(screen.height*dpr)+" @"+dpr.toFixed(1)+"x");
+  sv("i-c",String(nv.hardwareConcurrency||"–"));
+  sv("i-n",tx(nv.onLine?"Online":"Offline")+(c.effectiveType?" · "+c.effectiveType:"")+(c.downlink?" · "+c.downlink+" Mbps":"")+(c.rtt?" · "+c.rtt+" ms":""));
+  sv("i-z",Intl.DateTimeFormat().resolvedOptions().timeZone||"–");
+  sv("m-ram",nv.deviceMemory?"≈ "+nv.deviceMemory+" GB":"–");
+  if(pm){ sv("m-heap",fb(pm.usedJSHeapSize)+" / "+fb(pm.jsHeapSizeLimit)); $("b-heap").style.width=Math.max(2,pm.usedJSHeapSize/pm.jsHeapSizeLimit*100)+"%"; }
+  let sz=0; try{ for(const k of Object.keys(localStorage)) sz+=(k.length+localStorage.getItem(k).length)*2; }catch(e){}
+  sv("m-ls",fb(sz));
+  try{ const e=await nv.storage.estimate(); sv("m-st",fb(e.usage)+" / "+fb(e.quota)); $("b-st").style.width=Math.max(2,e.usage/e.quota*100)+"%"; sv("m-ca",fb(e.usageDetails&&e.usageDetails.caches)); }catch(e){}
+  try{ const b=await nv.getBattery(); sv("i-bt",Math.round(b.level*100)+"%"+(b.charging?" ⚡":"")); }catch(e){}
+}
+async function startMt(){
+  try{ hv=await navigator.userAgentData.getHighEntropyValues(["model","platformVersion"]); }catch(e){}
+  clearInterval(mtT); mtTick(); mtT=setInterval(mtTick,2000);
+}
+const _rs=renderSettings;
+renderSettings=function(){
+  _rs();
+  const set=document.querySelector(".set"); if(!set) return;
+  set.querySelector("h2").after(langCard());
+  set.querySelectorAll(":scope > .gl")[3].before(maintCard()); // before the policies card
+  set.querySelectorAll(":scope > .gl").forEach((g,i)=>g.style.setProperty("--d",i));
+  trTree(set); startMt();
+};
+setLang(lang);
+
+/* ===== Capacitor APK: Android Back button ===== */
+const CAPP=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;
+if(CAPP){
+  CAPP.addListener("backButton",()=>{
+    if($("player").classList.contains("show")) $("close").click();
+    else if(tab!=="home") document.querySelector('nav [data-t="home"]').click();
+    else CAPP.exitApp();
+  });
+}
+
+loadAll();
+setTimeout(hideSplash,7000);
+</script>
+</body>
+  </html>
